@@ -9,6 +9,13 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Kaushan+Script&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
+        :root {
+            --resort-green: #043e35;
+            --resort-gold: #e5a93c;
+            --resort-gold-hover: #cf932b;
+            --resort-bg: #faf9f5;
+        }
+
         body {
             font-family: "Poppins", sans-serif;
         }
@@ -31,6 +38,7 @@
 
 
         /* section 1 */
+        /* // */
         #home-id-1 {
 
             background: linear-gradient(to bottom,
@@ -45,6 +53,124 @@
             font-family: "Kaushan Script", cursive;
             font-size: 28px;
         }
+
+        .modal-content.resort-modal {
+            background-color: var(--resort-bg);
+            border: 1px solid rgba(4, 62, 53, 0.15);
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .resort-title {
+            font-family: "Kaushan Script", cursive;
+            /* font-family: 'Cormorant Garamond', serif; */
+            font-weight: 600;
+            color: var(--resort-green);
+            letter-spacing: 0.5px;
+        }
+
+        .resort-subtitle {
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #6c757d;
+        }
+
+        /* Input Fields */
+        .resort-input {
+            background-color: #fff;
+            border: 1px solid #dcdad1;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            padding: 0.75rem 1rem;
+        }
+
+        .resort-input:focus {
+            border-color: var(--resort-green);
+            box-shadow: 0 0 0 0.2rem rgba(4, 62, 53, 0.15);
+        }
+
+        /* Primary Submit Button (Gold) */
+        .btn-resort-gold {
+            background-color: var(--resort-gold);
+            color: #1a1a1a;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-resort-gold:hover {
+            background-color: var(--resort-gold-hover);
+            color: #000;
+        }
+
+        /* Divider */
+        .divider-text {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #8c8c8c;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 1.5rem 0;
+        }
+
+        .divider-text::before,
+        .divider-text::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #ddd8cc;
+        }
+
+        .divider-text:not(:empty)::before {
+            margin-right: 1em;
+        }
+
+        .divider-text:not(:empty)::after {
+            margin-left: 1em;
+        }
+
+        /* Social Login Buttons */
+        .btn-social {
+            border: 1px solid #dcdad1;
+            background-color: #ffffff;
+            color: #333;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 0.6rem;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-social:hover {
+            background-color: #f1efe8;
+            border-color: #bbb;
+            color: #000;
+        }
+
+        /* Links */
+        .resort-link {
+            color: var(--resort-green);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .resort-link:hover {
+            color: var(--resort-gold-hover);
+            text-decoration: underline;
+        }
+
 
         /* section 2 */
         #zhen-accommodation {
@@ -138,8 +264,7 @@
             display: block;
 
             margin-bottom: 10px;
-
-            font-family: "Montserrat", sans-serif;
+            /* font-family: "Montserrat", sans-serif; */
             font-size: 9px;
             font-weight: 500;
             letter-spacing: 4px;
@@ -152,8 +277,7 @@
         */
         .experience-title {
             margin: 0 0 10px;
-
-            font-family: "Cormorant Garamond", serif;
+            /* font-family: "Cormorant Garamond", serif; */
             font-size: 29px;
             font-weight: 400;
             line-height: 1.1;
@@ -486,10 +610,89 @@
             <p class="text-center"><span style="font-size: 12px;">ZHEN RESORT BY NEK OKNHA BUNLEAP</span></p>
 
             <div class="d-flex justify-content-center">
-                <a href="#" class="btn btn-warning">
+                <a href="#" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resortLoginModal">
                     FIND YOUR STAY
                 </a>
             </div>
+
+            <!-- // -->
+            <!-- // -->
+
+            <div class="modal fade" id="resortLoginModal" tabindex="-1" aria-labelledby="resortLoginModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+                    <div class="modal-content resort-modal p-3 p-sm-4 position-relative">
+
+                        <!-- Close Button -->
+                        <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+
+                        <!-- Welcome Note & Header -->
+                        <div class="text-center mt-2 mb-4">
+                            <span class="resort-subtitle">Zhen Resort & Sanctuary</span>
+                            <h2 class="resort-title display-6 mt-1 mb-2">Welcome Back</h2>
+                            <p class="text-muted small mb-0 fst-italic">"Where the world falls away..."</p>
+                        </div>
+
+                        <!-- Form Elements -->
+                        <form>
+                            <!-- Username / Email -->
+                            <div class="mb-3">
+                                <label for="usernameInput" class="form-label small fw-medium text-secondary">Username or Email</label>
+                                <input type="text" class="form-control resort-input" id="usernameInput" placeholder="Enter your email" required />
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-2">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label for="passwordInput" class="form-label small fw-medium text-secondary mb-0">Password</label>
+                                    <a href="#" class="small text-muted text-decoration-none">Forgot?</a>
+                                </div>
+                                <input type="password" class="form-control resort-input" id="passwordInput" placeholder="••••••••" required />
+                            </div>
+
+                            <!-- Sign In Button -->
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-resort-gold">Sign In</button>
+                            </div>
+                        </form>
+
+                        <!-- Divider -->
+                        <div class="divider-text">or continue with</div>
+
+                        <!-- Social Logins (Google, Apple, Microsoft) -->
+                        <div class="d-flex flex-column gap-2">
+                            <!-- Google -->
+                            <button type="button" class="btn btn-social">
+                                <i class="bi bi-google text-danger"></i>
+                                <span>Continue with Google</span>
+                            </button>
+
+                            <!-- Apple -->
+                            <button type="button" class="btn btn-social">
+                                <i class="bi bi-apple text-dark"></i>
+                                <span>Continue with Apple</span>
+                            </button>
+
+                            <!-- Microsoft -->
+                            <button type="button" class="btn btn-social">
+                                <i class="bi bi-microsoft text-primary"></i>
+                                <span>Continue with Microsoft</span>
+                            </button>
+                        </div>
+
+                        <!-- Register Link -->
+                        <div class="text-center mt-4 pt-2 border-top">
+                            <p class="small text-muted mb-0">
+                                Don't have an account?
+                                <a href="register.html" class="resort-link ms-1">Register here</a>
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- // -->
+            <!-- // -->
         </div>
     </section>
     </div>
@@ -1005,7 +1208,7 @@
                         <h2>真 ZHEN</h2>
 
                         <span class="brand-subtitle">
-                            PRIVATE RESORT by Neak Oknha Bunleap
+                            PRIVATE RESORT by NEAK OKNHA BUNLEAP
                         </span>
 
                         <p>

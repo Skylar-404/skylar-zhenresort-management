@@ -10,23 +10,51 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Non-standard singular table name.
+     */
+    protected $table = 'user';
+
+    /**
+     * The attributes that are mass assignable.
+     */
+    protected $fillable = [
+        'username',
+        'email',
+        'password_hash',
+        'full_name',
+        'role',
+        'permissions',
+        'is_active',
+    ];
+
+    /**
+     * Hidden attributes for serialization (arrays / JSON).
+     */
+    protected $hidden = [
+        'password_hash',
+    ];
+
+    /**
+     * Cast attributes to native types.
      */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'permissions' => 'array',
+            'is_active'   => 'boolean',
         ];
+    }
+
+    /**
+     * Map default Auth system to custom password column.
+     */
+    public function getAuthPassword()
+    {
+        return $this->password_hash;
     }
 }
