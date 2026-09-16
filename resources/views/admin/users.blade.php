@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Maison Verde - Administration</title>
+    <title>Administration</title>
 
     <!-- Bootstrap 5.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -279,49 +279,47 @@
             <!-- Navigation Links -->
             <ul class="nav flex-column mb-auto">
                 <li class="nav-item">
-                    <a href="#" class="nav-link"><span class="index-num">01</span><i class="bi bi-grid me-2"></i> Overview</a>
+                    <a href="{{ route('admin.dashboard') }}" class="nav-link"><span class="index-num">01</span><i class="bi bi-grid me-2"></i> Overview</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link"><span class="index-num">02</span><i class="bi bi-calendar3 me-2"></i> Reservations</a>
+                    <a href="{{ route('admin.reservations') }}" class="nav-link active"><span class="index-num">02</span><i class="bi bi-calendar3 me-2"></i> Reservations</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link"><span class="index-num">03</span><i class="bi bi-door-closed me-2"></i> Front Office</a>
+                    <a href="#" class="nav-link"><span class="index-num">03</span><i class="bi bi-building me-2"></i> Property</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link"><span class="index-num">04</span><i class="bi bi-building me-2"></i> Property</a>
+                    <a href="#" class="nav-link"><span class="index-num">04</span><i class="bi bi-wrench me-2"></i> Operations</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link"><span class="index-num">05</span><i class="bi bi-wrench me-2"></i> Operations</a>
+                    <a href="#" class="nav-link"><span class="index-num">05</span><i class="bi bi-star me-2"></i> Services</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link"><span class="index-num">06</span><i class="bi bi-star me-2"></i> Services</a>
+                    <a href="{{ route('admin.guests') }}" class="nav-link"><span class="index-num">06</span><i class="bi bi-people me-2"></i> Guests</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link"><span class="index-num">07</span><i class="bi bi-people me-2"></i> Guests</a>
+                    <a href="#" class="nav-link"><span class="index-num">07</span><i class="bi bi-receipt me-2"></i> Finance</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link"><span class="index-num">08</span><i class="bi bi-receipt me-2"></i> Finance</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link active"><span class="index-num">09</span><i class="bi bi-gear me-2"></i> Administration</a>
+                    <a href="{{ route('admin.users') }}" class="nav-link"><span class="index-num">08</span><i class="bi bi-gear me-2"></i> Administration</a>
                 </li>
             </ul>
         </div>
 
         <!-- Sidebar Bottom / User Footer -->
         <div class="pt-3 border-top border-white border-opacity-10 px-1">
-            <a href="#" class="nav-link px-1 mb-2 text-white-50 small">
-                <i class="bi bi-layout-sidebar-inset me-2"></i> Collapse
-            </a>
-            <div class="d-flex align-items-center gap-2 mt-2">
-                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
-                    style="width: 32px; height: 32px; background-color: var(--mv-gold); color: #1B3527; font-size: 0.75rem;">
-                    AV
+            {{-- User Info Display & Logout Form --}}
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-end small d-none d-sm-block">
+                    <div class="fw-bold text-dark">{{ Auth::user()->full_name ?? Auth::user()->username }}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Role: {{ Auth::user()->role }}</div>
                 </div>
-                <div style="line-height: 1.2;">
-                    <div class="fw-semibold text-white small">Adela V.</div>
-                    <span style="font-size: 0.68rem; opacity: 0.6;">Front Desk Manager</span>
-                </div>
+
+                <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Sign out of PMS?');">
+                        Logout
+                    </button>
+                </form>
             </div>
         </div>
     </aside>
@@ -492,7 +490,7 @@
                                                 </button>
 
                                                 <!-- Delete Form -->
-                                                <form action="{{ route('users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Delete user {{ $user->username }}?');">
+                                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Delete user {{ $user->username }}?');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
@@ -513,7 +511,7 @@
                         <!-- 1. CREATE USER MODAL                                                      -->
                         <div class="modal fade" id="createUserModal" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
-                                <form action="{{ route('users.store') }}" method="POST" class="modal-content">
+                                <form action="{{ route('admin.users.store') }}" method="POST" class="modal-content">
                                     @csrf
                                     <div class="modal-header">
                                         <h5 class="modal-title fw-bold">Create User</h5>

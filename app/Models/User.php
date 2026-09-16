@@ -2,10 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -15,13 +11,10 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * Non-standard singular table name.
+     * Exact table name from database.
      */
     protected $table = 'user';
 
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $fillable = [
         'username',
         'email',
@@ -32,16 +25,11 @@ class User extends Authenticatable
         'is_active',
     ];
 
-    /**
-     * Hidden attributes for serialization (arrays / JSON).
-     */
     protected $hidden = [
         'password_hash',
+        'remember_token',
     ];
 
-    /**
-     * Cast attributes to native types.
-     */
     protected function casts(): array
     {
         return [
@@ -51,10 +39,10 @@ class User extends Authenticatable
     }
 
     /**
-     * Map default Auth system to custom password column.
+     * Tell Laravel to look at `password_hash` instead of `password`.
      */
-    public function getAuthPassword()
+    public function getAuthPasswordName(): string
     {
-        return $this->password_hash;
+        return 'password_hash';
     }
 }

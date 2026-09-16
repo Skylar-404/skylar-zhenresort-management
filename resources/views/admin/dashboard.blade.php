@@ -232,31 +232,50 @@
 
             <!-- Main Navigation -->
             <nav>
-                <ul class="nav nav-pills flex-column">
-                    <li><a href="#" class="nav-link active"><i class="bi bi-display link-icon"></i> Overview</a></li>
-                    <li><a href="#" class="nav-link"><i class="bi bi-calendar-event link-icon"></i> Reservations</a></li>
-                    <li><a href="#" class="nav-link"><i class="bi bi-box-seam link-icon"></i> Front Office</a></li>
-                    <li><a href="#" class="nav-link"><i class="bi bi-house link-icon"></i> Property</a></li>
-                    <li><a href="#" class="nav-link"><i class="bi bi-wrench link-icon"></i> Operations</a></li>
-                    <li><a href="#" class="nav-link"><i class="bi bi-bell link-icon"></i> Services</a></li>
-                    <li><a href="#" class="nav-link"><i class="bi bi-people link-icon"></i> Guests</a></li>
-                    <li><a href="#" class="nav-link"><i class="bi bi-graph-up link-icon"></i> Finance</a></li>
-                    <li><a href="#" class="nav-link"><i class="bi bi-person-gear link-icon"></i> Administration</a></li>
+                <ul class="nav flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="{{ route('admin.dashboard') }}" class="nav-link"><span class="index-num">01</span><i class="bi bi-grid me-2"></i> Overview</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.reservations') }}" class="nav-link active"><span class="index-num">02</span><i class="bi bi-calendar3 me-2"></i> Reservations</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link"><span class="index-num">03</span><i class="bi bi-building me-2"></i> Property</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link"><span class="index-num">04</span><i class="bi bi-wrench me-2"></i> Operations</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link"><span class="index-num">05</span><i class="bi bi-star me-2"></i> Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.guests') }}" class="nav-link"><span class="index-num">06</span><i class="bi bi-people me-2"></i> Guests</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link"><span class="index-num">07</span><i class="bi bi-receipt me-2"></i> Finance</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.users') }}" class="nav-link"><span class="index-num">08</span><i class="bi bi-gear me-2"></i> Administration</a>
+                    </li>
                 </ul>
             </nav>
         </div>
 
         <!-- User Info -->
         <div class="user-block pt-3" style="border-top: 1px solid rgba(255,255,255,0.1);">
-            <div class="mb-3 d-flex align-items-center">
-                <i class="bi bi-arrow-bar-left me-2"></i> Collapse
-            </div>
-            <div class="d-flex align-items-center">
-                <div class="initials me-2" style="width: 36px; height: 36px; border-radius: 50%; background-color: var(--mv-accent-gold); color: white; display:flex; align-items:center; justify-content:center;">AV</div>
-                <div>
-                    <div>JohnPork</div>
-                    <div style="color:rgba(255,255,255,0.7); font-size:0.8rem;">Front Desk Manager</div>
+            {{-- User Info Display & Logout Form --}}
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-end small d-none d-sm-block">
+                    <div class="fw-bold text-dark">{{ Auth::user()->full_name ?? Auth::user()->username }}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Role: {{ Auth::user()->role }}</div>
                 </div>
+
+                <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Sign out of PMS?');">
+                        Logout
+                    </button>
+                </form>
             </div>
         </div>
     </aside>
@@ -288,138 +307,200 @@
                 <p class="text-muted mb-0">Wednesday, 9 September 2026 &middot; Zhen Private Resort & Spa</p>
             </div>
 
-            <!-- METRIC GRID (Top Row) -->
-            <div class="row row-cols-1 row-cols-md-3 row-cols-xl-6 g-4 mb-5">
-                <!-- Metric Card 1: Occupancy -->
-                <div class="col">
-                    <div class="metric-card">
-                        <div class="label">OCCUPANCY</div>
-                        <div class="value">43%</div>
-                        <div class="text-muted" style="font-size:0.8rem;">9 of 21 rooms</div>
-                        <div class="w-100 bg-light mt-2" style="height: 4px; border-radius: 2px;">
-                            <div class="bg-secondary" style="height: 100%; width: 43%; border-radius: 2px;"></div>
+            <div class="container-fluid px-lg-5">
+                {{-- Top Bar Navigation & Logout --}}
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-0">Resort Operations Dashboard</h2>
+                        <p class="text-muted small mb-0">{{ now()->format('l, F d, Y') }} &bull; Real-time Performance Overview</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('admin.reservations') }}" class="btn btn-outline-primary btn-sm">Manage Bookings</a>
+                        <a href="{{ route('admin.folios') }}" class="btn btn-outline-dark btn-sm">Folios & Billing</a>
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-danger btn-sm">Sign Out</button>
+                        </form>
+                    </div>
+                </div>
+
+                {{-- KPI Cards Row 1: Primary Metrics --}}
+                <div class="row g-3 mb-4">
+                    {{-- Occupancy Rate --}}
+                    <div class="col-md-3">
+                        <div class="card p-3 shadow-sm border-0 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small fw-bold text-uppercase">Occupancy Rate</span>
+                                <span class="badge bg-primary-subtle text-primary">{{ $occupiedRooms }} / {{ $totalRooms }} Villas</span>
+                            </div>
+                            <h2 class="fw-bold text-dark mb-1">{{ $occupancyRate }}%</h2>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $occupancyRate }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Total Revenue --}}
+                    <div class="col-md-3">
+                        <div class="card p-3 shadow-sm border-0 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small fw-bold text-uppercase">Total Collections</span>
+                                <span class="badge bg-success-subtle text-success">+${{ number_format($todayRevenue, 2) }} Today</span>
+                            </div>
+                            <h2 class="fw-bold text-success mb-1">${{ number_format($totalRevenue, 2) }}</h2>
+                            <small class="text-muted">Unsettled: ${{ number_format($outstandingBalance, 2) }}</small>
+                        </div>
+                    </div>
+
+                    {{-- In-House Guests --}}
+                    <div class="col-md-3">
+                        <div class="card p-3 shadow-sm border-0 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small fw-bold text-uppercase">In-House Guests</span>
+                                <span class="badge bg-info-subtle text-info-emphasis">Registered: {{ $totalGuests }}</span>
+                            </div>
+                            <h2 class="fw-bold text-dark mb-1">{{ $checkedInGuests }}</h2>
+                            <small class="text-muted">Arrivals: {{ $arrivalsToday }} | Departures: {{ $departuresToday }}</small>
+                        </div>
+                    </div>
+
+                    {{-- Maintenance Alert --}}
+                    <div class="col-md-3">
+                        <div class="card p-3 shadow-sm border-0 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small fw-bold text-uppercase">Work Orders</span>
+                                <span class="badge bg-danger-subtle text-danger">Active</span>
+                            </div>
+                            <h2 class="fw-bold {{ $pendingRepairs > 0 ? 'text-danger' : 'text-dark' }} mb-1">{{ $pendingRepairs }}</h2>
+                            <small class="text-muted">Housekeeping dirty villas: {{ $dirtyRooms }}</small>
                         </div>
                     </div>
                 </div>
-                <!-- Metric Card 2: RevPAR -->
-                <div class="col">
-                    <div class="metric-card">
-                        <div class="label">REVPAR</div>
-                        <div class="value">$225</div>
-                        <div class="text-muted" style="font-size:0.8rem;">Revenue per avail. room</div>
+
+                {{-- Villa Inventory Status Grid --}}
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <div class="card p-3 shadow-sm border-0">
+                            <h6 class="fw-bold mb-3 text-secondary text-uppercase small">Villa Room Status Breakdown</h6>
+                            <div class="row text-center g-2">
+                                <div class="col-md-4">
+                                    <div class="p-2 border rounded bg-success-subtle border-success-subtle">
+                                        <span class="text-success small fw-bold">AVAILABLE (READY)</span>
+                                        <h4 class="fw-bold text-success mb-0 mt-1">{{ $availableRooms }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-2 border rounded bg-primary-subtle border-primary-subtle">
+                                        <span class="text-primary small fw-bold">OCCUPIED (IN-HOUSE)</span>
+                                        <h4 class="fw-bold text-primary mb-0 mt-1">{{ $occupiedRooms }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-2 border rounded bg-warning-subtle border-warning-subtle">
+                                        <span class="text-warning-emphasis small fw-bold">DIRTY / HOUSEKEEPING</span>
+                                        <h4 class="fw-bold text-warning-emphasis mb-0 mt-1">{{ $dirtyRooms }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <!-- Metric Card 3: Today's Arrivals -->
-                <div class="col">
-                    <div class="metric-card">
-                        <div class="label">TODAY'S ARRIVALS</div>
-                        <div class="value">5</div>
-                        <div class="text-muted" style="font-size:0.8rem;">Expected check-ins</div>
+
+                {{-- Activity Split: Recent Bookings & Financial Activity --}}
+                <div class="row g-3 mb-4">
+                    {{-- Recent Bookings --}}
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold mb-0">Latest Booking Activity</h6>
+                                <a href="{{ route('admin.reservations') }}" class="small text-decoration-none">View All Bookings &rarr;</a>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0 small">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-3">Ref #</th>
+                                            <th>Guest</th>
+                                            <th>Room</th>
+                                            <th>Dates</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($recentReservations as $booking)
+                                        @php
+                                        $statusBadges = [
+                                        'CONFIRMED' => 'bg-info text-dark',
+                                        'CHECKED_IN' => 'bg-success',
+                                        'CHECKED_OUT' => 'bg-secondary',
+                                        'CANCELLED' => 'bg-danger',
+                                        'PENDING' => 'bg-warning text-dark',
+                                        ];
+                                        @endphp
+                                        <tr>
+                                            <td class="ps-3 fw-bold">{{ $booking->reservation_no }}</td>
+                                            <td>{{ $booking->guest->full_name ?? 'N/A' }}</td>
+                                            <td>Villa {{ $booking->room->room_number ?? '-' }}</td>
+                                            <td>
+                                                {{ \Carbon\Carbon::parse($booking->check_in_date)->format('M d') }} -
+                                                {{ \Carbon\Carbon::parse($booking->check_out_date)->format('M d') }}
+                                            </td>
+                                            <td><span class="badge {{ $statusBadges[$booking->status] ?? 'bg-secondary' }}">{{ $booking->status }}</span></td>
+                                        </tr>
+                                        @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center py-3 text-muted">No reservations found.</td>
+                                        </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Financial Activity Ledger --}}
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white py-3 border-0">
+                                <h6 class="fw-bold mb-0">Recent Payment Receipts</h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <ul class="list-group list-group-flush small">
+                                    @forelse($recentPayments as $pay)
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                                        <div>
+                                            <div class="fw-bold">{{ $pay->folio->guest->full_name ?? 'Walk-in' }}</div>
+                                            <small class="text-muted">{{ $pay->payment_method }} &bull; {{ $pay->paid_at ? $pay->paid_at->format('H:i') : '' }}</small>
+                                        </div>
+                                        <span class="fw-bold text-success">+${{ number_format($pay->amount, 2) }}</span>
+                                    </li>
+                                    @empty
+                                    <li class="list-group-item text-center py-3 text-muted">No recent payments logged.</li>
+                                    @endforelse
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <!-- Metric Card 4: Today's Departures -->
-                <div class="col">
-                    <div class="metric-card">
-                        <div class="label">TODAY'S DEPARTURES</div>
-                        <div class="value">1</div>
-                        <div class="text-muted" style="font-size:0.8rem;">Expected check-outs</div>
+
+                {{-- Urgent Maintenance Row --}}
+                @if($urgentRepairs->isNotEmpty())
+                <div class="card border-0 shadow-sm p-3 border-start border-danger border-4">
+                    <h6 class="fw-bold text-danger mb-2">High Priority Maintenance Warnings</h6>
+                    <div class="row g-2">
+                        @foreach($urgentRepairs as $repair)
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded bg-light small">
+                                <span class="badge bg-danger">{{ $repair->priority }}</span>
+                                <strong>Villa {{ $repair->room->room_number ?? 'N/A' }}</strong>: {{ $repair->issue_title }}
+                            </div>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
-                <!-- Metric Card 5: Rooms Dirty -->
-                <div class="col">
-                    <div class="metric-card">
-                        <div class="label">ROOMS DIRTY</div>
-                        <div class="value">2</div>
-                        <div class="text-muted" style="font-size:0.8rem;">Pending housekeeping</div>
-                    </div>
-                </div>
-                <!-- Metric Card 6: Out of Order -->
-                <div class="col">
-                    <div class="metric-card border border-dark" style="background-color: #f2f2f2;">
-                        <div class="label">OUT OF ORDER</div>
-                        <div class="value">2</div>
-                        <div class="text-muted" style="font-size:0.8rem;">Unavailable rooms</div>
-                    </div>
-                </div>
+                @endif
             </div>
-
-            <!-- LOWER GRID (Left and Right Lists) -->
-            <div class="row g-4">
-
-                <!-- Left: Arrivals List -->
-                <div class="col-lg-7">
-                    <div class="dashboard-card">
-                        <div class="section-title">
-                            <div>
-                                <span class="fs-6 text-uppercase text-muted fw-bold me-2">ARRIVALS TODAY</span>
-                                <span class="fs-4 fw-bold">5 check-ins</span>
-                            </div>
-                            <button class="btn btn-outline-dark btn-sm rounded-pill px-3">Front Office &rarr;</button>
-                        </div>
-
-                        <ul class="list-unstyled mb-0">
-                            <li class="list-item">
-                                <div class="initials">AL</div>
-                                <div class="details">
-                                    <div class="fw-bold fs-6">Al-Hassan</div>
-                                    <div class="text-muted" style="font-size:0.8rem;">Villa 02 &middot; 4 guests</div>
-                                </div>
-                                <div><span class="status-badge status-confirmed">Confirmed</span></div>
-                            </li>
-                            <li class="list-item">
-                                <div class="initials">TA</div>
-                                <div class="details">
-                                    <div class="fw-bold fs-6">Tanaka</div>
-                                    <div class="text-muted" style="font-size:0.8rem;">202 &middot; 2 guests</div>
-                                </div>
-                                <div><span class="status-badge status-confirmed">Confirmed</span></div>
-                            </li>
-                            <li class="list-item">
-                                <div class="initials">LI</div>
-                                <div class="details">
-                                    <div class="fw-bold fs-6">Lindqvist</div>
-                                    <div class="text-muted" style="font-size:0.8rem;">303 &middot; 2 guests</div>
-                                </div>
-                                <div><span class="status-badge status-confirmed">Confirmed</span></div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Right: Housekeeping List -->
-                <div class="col-lg-5">
-                    <div class="dashboard-card">
-                        <div class="section-title mb-1">
-                            <div>
-                                <span class="fs-6 text-uppercase text-muted fw-bold me-2">HOUSEKEEPING STATUS</span>
-                                <span class="fs-4 fw-bold">6 tasks open</span>
-                            </div>
-                            <button class="btn btn-outline-dark btn-sm rounded-pill px-3">Operations &rarr;</button>
-                        </div>
-
-                        <ul class="list-unstyled mb-0 mt-4">
-                            <li class="list-item">
-                                <div class="initials border border-danger">102</div>
-                                <div class="details<script src=" https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-                                    </script>">
-                                    <div class="fw-bold fs-6">Room 102</div>
-                                    <div class="text-muted" style="font-size:0.8rem;">Full Clean + Turndown</div>
-                                </div>
-                                <div class="text-end">
-                                    <div style="font-size:0.8rem;">Rosa M.</div>
-                                    <div><span class="status-badge status-pending">Pending</span></div>
-                                </div>
-                            </li>
-                            <li class="list-item border-left border-3 border-danger">
-                                <div class="initials">205</div>
-                                <div class="details">
-                                    <div class="fw-bold fs-6">Room 205</div>
-                                    <div class="text-muted" style="font-size:0.8rem;">Departure Clean</div>
-                                </div>
-                                <div class="text-end">
-                                    <div style="font-size:0.8rem;">Anya B.
-
-                                        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
