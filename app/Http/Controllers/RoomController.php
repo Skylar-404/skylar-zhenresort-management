@@ -26,7 +26,7 @@ class RoomController extends Controller
         $dirtyRooms     = $rooms->where('status', 'DIRTY')->count();
         $maintenanceRooms = $rooms->where('status', 'MAINTENANCE')->count();
 
-        return view('admin.rooms', compact(
+        return view('admin.property', compact(
             'rooms',
             'totalRooms',
             'availableRooms',
@@ -49,7 +49,7 @@ class RoomController extends Controller
 
         Room::create($validated);
 
-        return redirect()->route('admin.rooms')->with('success', 'Villa/Room created successfully.');
+        return redirect()->route('admin.property')->with('success', 'Villa/Room created successfully.');
     }
 
     public function update(Request $request, $id)
@@ -67,7 +67,7 @@ class RoomController extends Controller
 
         $room->update($validated);
 
-        return redirect()->route('admin.rooms')->with('success', 'Room details updated.');
+        return redirect()->route('admin.property')->with('success', 'Room details updated.');
     }
 
     public function updateStatus(Request $request, $id)
@@ -94,6 +94,6 @@ class RoomController extends Controller
 
         $room->delete();
 
-        return redirect()->route('admin.rooms')->with('success', 'Room deleted.');
+        return redirect()->route('admin.property')->with('success', 'Room deleted.');
     }
 }

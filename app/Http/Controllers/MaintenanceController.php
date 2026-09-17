@@ -24,9 +24,30 @@ class MaintenanceController extends Controller
         $technicians = User::where('role', 'MAINTENANCE')->where('is_active', 1)->get();
 
         // Operational Aggregates
-        $totalTickets     = Maintenance::count();
-        $pendingTickets   = Maintenance::where('status', 'PENDING')->count();
-        $inProgressTickets = Maintenance::where('status', 'IN_PROGRESS')->count();
+        $totalTickets          = Maintenance::count();
+        $pendingTickets        = Maintenance::whereIn('status', ['REPORTED', 'PENDING'])->count();
+        $inProgressTickets     = Maintenance::where('status', 'IN_PROGRESS')->count();
+        $resolvedTicketsCount  = Maintenance::whereIn('status', ['RESOLVED', 'CLOSED'])->count();
+        $cancelledTicketsCount = Maintenance::where('status', 'CANCELLED')->count();
+        $openTickets           = $pendingTickets + $inProgressTickets;
+
+        $urgentTicketsCount    = Maintenance::whereIn('priority', ['HIGH', 'CRITICAL'])
+            ->whereIn('status', ['REPORTED', 'PENDING', 'IN_PROGRESS'])
+            ->count();
+
+        $maintenanceRooms      = Room::where('status', 'MAINTENANCE')->get();
+        $maintenanceRoomsCount = $maintenanceRooms->count();
+
+        // Calculate average resolution time for resolved tickets in hours
+        $resolvedTickets = Maintenance::whereIn('status', ['RESOLVED', 'CLOSED'])
+            ->whereNotNull('created_at')
+            ->whereNotNull('resolved_at')
+            ->get();
+        $avgResolutionHours = $resolvedTickets->count() > 0
+            ? round($resolvedTickets->avg(function ($t) {
+                return $t->created_at->diffInMinutes($t->resolved_at) / 60;
+            }), 1)
+            : 0;
 
         return view('admin.maintenance', compact(
             'tickets',
@@ -34,7 +55,14 @@ class MaintenanceController extends Controller
             'technicians',
             'totalTickets',
             'pendingTickets',
-            'inProgressTickets'
+            'inProgressTickets',
+            'resolvedTicketsCount',
+            'cancelledTicketsCount',
+            'openTickets',
+            'urgentTicketsCount',
+            'maintenanceRooms',
+            'maintenanceRoomsCount',
+            'avgResolutionHours'
         ));
     }
 
@@ -52,20 +80,35 @@ class MaintenanceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'room_id'      => 'required|exists:room,id',
-            'assigned_to'  => 'nullable|exists:user,id',
-            'issue_title'  => 'required|string|max:150',
-            'description'  => 'required|string',
-            'priority'     => 'required|in:LOW,MEDIUM,HIGH,CRITICAL',
-            'status'       => 'required|in:PENDING,IN_PROGRESS,RESOLVED,CANCELLED',
-            'cost'         => 'nullable|numeric|min:0',
-            'started_at'   => 'nullable|date',
-            'resolved_at'  => 'nullable|date|after_or_equal:started_at',
+            'room_id'        => 'required|exists:room,id',
+            'assigned_to'    => 'nullable|exists:user,id',
+            'category'       => 'nullable|string|max:50',
+            'issue_title'    => 'nullable|string|max:150',
+            'description'    => 'required|string|max:500',
+            'priority'       => 'required|in:LOW,MEDIUM,HIGH,CRITICAL',
+            'status'         => 'required|in:REPORTED,PENDING,IN_PROGRESS,RESOLVED,CLOSED,CANCELLED',
+            'scheduled_date' => 'nullable|date',
+            'resolved_at'    => 'nullable|date',
         ]);
 
-        $validated['reported_by'] = auth()->id() ?? 1;
+        $status = in_array($validated['status'], ['REPORTED', 'IN_PROGRESS', 'RESOLVED', 'CLOSED', 'CANCELLED'])
+            ? $validated['status']
+            : ($validated['status'] === 'PENDING' ? 'REPORTED' : 'REPORTED');
 
-        Maintenance::create($validated);
+        $category = !empty($validated['category']) ? $validated['category'] : (!empty($validated['issue_title']) ? $validated['issue_title'] : 'General Maintenance');
+
+        Maintenance::create([
+            'room_id'        => $validated['room_id'],
+            'work_order_no'  => 'WO-' . strtoupper(uniqid()),
+            'reported_by'    => auth()->id() ?? User::first()->id ?? 1,
+            'assigned_to'    => $validated['assigned_to'] ?? null,
+            'category'       => substr($category, 0, 50),
+            'description'    => $validated['description'],
+            'priority'       => $validated['priority'],
+            'status'         => $status,
+            'scheduled_date' => $request->input('scheduled_date'),
+            'resolved_at'    => $request->input('resolved_at'),
+        ]);
 
         return redirect()->route('admin.maintenance')->with('success', 'Maintenance ticket created successfully.');
     }
@@ -94,18 +137,33 @@ class MaintenanceController extends Controller
         $ticket = Maintenance::findOrFail($id);
 
         $validated = $request->validate([
-            'room_id'      => 'required|exists:room,id',
-            'assigned_to'  => 'nullable|exists:user,id',
-            'issue_title'  => 'required|string|max:150',
-            'description'  => 'required|string',
-            'priority'     => 'required|in:LOW,MEDIUM,HIGH,CRITICAL',
-            'status'       => 'required|in:PENDING,IN_PROGRESS,RESOLVED,CANCELLED',
-            'cost'         => 'nullable|numeric|min:0',
-            'started_at'   => 'nullable|date',
-            'resolved_at'  => 'nullable|date|after_or_equal:started_at',
+            'room_id'        => 'required|exists:room,id',
+            'assigned_to'    => 'nullable|exists:user,id',
+            'category'       => 'nullable|string|max:50',
+            'issue_title'    => 'nullable|string|max:150',
+            'description'    => 'required|string|max:500',
+            'priority'       => 'required|in:LOW,MEDIUM,HIGH,CRITICAL',
+            'status'         => 'required|in:REPORTED,PENDING,IN_PROGRESS,RESOLVED,CLOSED,CANCELLED',
+            'scheduled_date' => 'nullable|date',
+            'resolved_at'    => 'nullable|date',
         ]);
 
-        $ticket->update($validated);
+        $status = in_array($validated['status'], ['REPORTED', 'IN_PROGRESS', 'RESOLVED', 'CLOSED', 'CANCELLED'])
+            ? $validated['status']
+            : ($validated['status'] === 'PENDING' ? 'REPORTED' : $ticket->status);
+
+        $category = !empty($validated['category']) ? $validated['category'] : (!empty($validated['issue_title']) ? $validated['issue_title'] : $ticket->category);
+
+        $ticket->update([
+            'room_id'        => $validated['room_id'],
+            'assigned_to'    => $validated['assigned_to'] ?? null,
+            'category'       => substr($category, 0, 50),
+            'description'    => $validated['description'],
+            'priority'       => $validated['priority'],
+            'status'         => $status,
+            'scheduled_date' => $request->input('scheduled_date'),
+            'resolved_at'    => $request->input('resolved_at'),
+        ]);
 
         return redirect()->route('admin.maintenance')->with('success', 'Maintenance ticket updated successfully.');
     }

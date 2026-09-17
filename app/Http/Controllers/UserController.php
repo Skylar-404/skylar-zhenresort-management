@@ -14,13 +14,13 @@ class UserController extends Controller
      */
     public function index()
     {
-
         $totalUsers = User::count();
-
         $totalActiveUsers = User::where('is_active', 1)->count();
+        $roleCount = User::distinct('role')->count('role');
+        $recentUsers = User::latest()->take(3)->get();
 
         $users = User::latest()->get();
-        return view('admin.users', compact('users', 'totalUsers', 'totalActiveUsers'));
+        return view('admin.users', compact('users', 'totalUsers', 'totalActiveUsers', 'roleCount', 'recentUsers'));
     }
 
     /**

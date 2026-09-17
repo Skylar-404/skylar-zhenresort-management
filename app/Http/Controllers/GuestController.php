@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\Guest;
 
+use App\Models\Payment;
+use App\Models\Reservation;
+use App\Models\Room;
+use Carbon\Carbon;
+
 class GuestController extends Controller
 {
     /**
@@ -16,15 +21,37 @@ class GuestController extends Controller
         $guests = Guest::latest()->get();
 
         // Guest Directory Operational Aggregates
+        $today          = Carbon::today();
         $totalGuests    = Guest::count();
         $vipGuests      = Guest::whereIn('vip_status', ['SILVER', 'GOLD', 'PLATINUM'])->count();
         $activeProfiles = Guest::where('is_active', 1)->count();
+
+        // Guests currently in-house (checked in)
+        $inHouseGuestsCount = Guest::whereHas('reservations', function ($q) {
+            $q->where('status', 'CHECKED_IN');
+        })->count();
+
+        // Arriving today
+        $arrivingTodayGuestsCount = Guest::whereHas('reservations', function ($q) use ($today) {
+            $q->whereDate('check_in_date', $today)->whereIn('status', ['CONFIRMED', 'PENDING']);
+        })->count();
+
+        // Occupied rooms
+        $occupiedRoomsCount = Room::where('status', 'OCCUPIED')->count();
+
+        // Average lifetime spend across guests
+        $totalPaid = Payment::where('payment_status', 'SUCCESS')->sum('amount');
+        $avgLifetimeSpend = $totalGuests > 0 ? round($totalPaid / $totalGuests, 2) : 0;
 
         return view('admin.guests', compact(
             'guests',
             'totalGuests',
             'vipGuests',
-            'activeProfiles'
+            'activeProfiles',
+            'inHouseGuestsCount',
+            'occupiedRoomsCount',
+            'arrivingTodayGuestsCount',
+            'avgLifetimeSpend'
         ));
     }
 

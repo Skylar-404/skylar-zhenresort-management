@@ -25,9 +25,25 @@ class ReservationController extends Controller
         $availableRooms = Room::where('is_active', 1)->orderBy('room_number')->get();
 
         // 3. Operational Aggregates
+        $today           = \Carbon\Carbon::today();
         $totalBookings   = Reservation::count();
         $activeCheckIns  = Reservation::where('status', 'CHECKED_IN')->count();
         $confirmedStays  = Reservation::where('status', 'CONFIRMED')->count();
+        $pendingStays    = Reservation::where('status', 'PENDING')->count();
+        $cancelledStays  = Reservation::where('status', 'CANCELLED')->count();
+        $arrivingToday   = Reservation::whereDate('check_in_date', $today)->whereIn('status', ['CONFIRMED', 'PENDING'])->count();
+        $checkedInToday  = Reservation::whereDate('check_in_date', $today)->where('status', 'CHECKED_IN')->count();
+
+        // Calculate pacing revenue from confirmed / in-house reservations
+        $pacingRevenue = Reservation::whereIn('status', ['CONFIRMED', 'CHECKED_IN'])->get()->sum(function ($r) {
+            $nights = max(1, \Carbon\Carbon::parse($r->check_in_date)->diffInDays(\Carbon\Carbon::parse($r->check_out_date)));
+            return $nights * (float) ($r->nightly_rate ?? 0);
+        });
+
+        // Calculate average length of stay (in days)
+        $avgStayLength = Reservation::count() > 0 ? round(Reservation::get()->avg(function ($r) {
+            return max(1, \Carbon\Carbon::parse($r->check_in_date)->diffInDays(\Carbon\Carbon::parse($r->check_out_date)));
+        }), 1) : 0;
 
         return view('admin.reservation', compact(
             'reservations',
@@ -35,7 +51,13 @@ class ReservationController extends Controller
             'availableRooms',
             'totalBookings',
             'activeCheckIns',
-            'confirmedStays'
+            'confirmedStays',
+            'pendingStays',
+            'cancelledStays',
+            'arrivingToday',
+            'checkedInToday',
+            'pacingRevenue',
+            'avgStayLength'
         ));
     }
 

@@ -17,24 +17,35 @@ class Maintenance extends Model
 
     protected $fillable = [
         'room_id',
+        'work_order_no',
         'reported_by',
         'assigned_to',
-        'issue_title',
-        'description',
+        'category',
         'priority',
         'status',
-        'cost',
-        'started_at',
+        'room_status_on_report',
+        'description',
+        'resolution_notes',
+        'scheduled_date',
         'resolved_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'cost'        => 'decimal:2',
-            'started_at'  => 'datetime',
-            'resolved_at' => 'datetime',
+            'scheduled_date' => 'date',
+            'resolved_at'    => 'datetime',
+            'created_at'     => 'datetime',
+            'updated_at'     => 'datetime',
         ];
+    }
+
+    /**
+     * Virtual accessor for issue_title
+     */
+    public function getIssueTitleAttribute(): string
+    {
+        return $this->category ?? 'Maintenance Request';
     }
 
     /**
